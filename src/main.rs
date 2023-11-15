@@ -1,14 +1,29 @@
-pub struct my_struct {
+/* 
+  Resources:
+  https://fasterthanli.me/articles/a-half-hour-to-learn-rust
+  https://gtk-rs.org/gtk4-rs/stable/latest/book/introduction.html
+  https://doc.rust-lang.org/book/ch05-01-defining-structs.html
+*/
+
+use crate::registers::Registers;
+
+pub mod registers;
+
+pub struct MyStruct {
     pub field_1: i32,
     pub field_2: bool,
+    pub str_field: String
 }
 
-fn generate_struct() -> my_struct {
-    return my_struct {
+fn generate_struct() -> MyStruct {
+    return MyStruct {
         field_1: 45,
         field_2: true,
+        str_field: String::from("kekw")
     };
 }
+
+struct Color(i32, i32, i32);
 
 fn my_function(in_value: &mut i32) {
     // Stack variables such as integers just need to be dereferenced when passed by reference
@@ -44,7 +59,7 @@ fn string_ref_append(in_string: &mut String) {
   in_string.push_str(" with more!");
 }
 
-fn get_first_word(in_string: &String) -> &str {
+fn get_first_word(in_string: &str) -> &str {
   let str_bytes: &[u8] = in_string.as_bytes();
 
   for (i, &item) in str_bytes.iter().enumerate() {
@@ -53,6 +68,15 @@ fn get_first_word(in_string: &String) -> &str {
     }
   }
   &in_string[..]
+}
+
+enum IpAddrFamily {
+  IPv4,
+  IPv6
+}
+
+struct IpAddress {
+  
 }
 
 fn main() {
@@ -97,13 +121,19 @@ fn main() {
     );
 
     // In Rust, it is efficient to return by value as values are moved instead of copied
-    let struct_test: my_struct = generate_struct();
+    let struct_test: MyStruct = generate_struct();
     println!(
         "Struct field 1: {}, field 2: {}",
         struct_test.field_1, struct_test.field_2
     );
 
-    // let inline_value
+    takes_ownership(struct_test.str_field);
+    // println!("struct test: {}", struct_test.str_field);
+
+    // Struct tuple: struct Color(i32, i32, i32)
+    // a structured tuple, or a struct without names
+    let _black = Color(0, 0, 0);
+    _black.0;
 
     // Memory is returned once variable is out of scope
     {
@@ -174,5 +204,20 @@ fn main() {
 
       because 's' is deallocated once dangle() completes, whilst returning a pointer to nothing
 
-     */
+    */
+    let test_string = String::from("Test string");
+
+    let first_word = get_first_word(&test_string);
+    println!("First word: {}", first_word);
+
+    let mut regs: Registers = Registers::init_registers();
+    regs.set_single(230, 'a');
+    println!("register a = {}", regs.get_single('a'));
+
+    // Compiler can infer the type
+    let _optional_value = Some(10);
+    // 'None' value can be instantiated, but requires explicit type:
+    let _empty_value: Option<i32> = None;
+
+    
 }
