@@ -26,15 +26,15 @@ impl Registers {
 
   pub fn set_single(&mut self, in_value: u8, in_register: char) {
     match in_register {
-      'a' => self.update_registers(&mut self.af, in_value.into()),
-      'b' => self.update_registers(&mut self.bc, in_value.into()),
+      'a' => update_registers(&mut self.af, in_value.into()),
+      'b' => update_registers(&mut self.bc, in_value.into()),
       _ => println!("Invalid register: {}", in_register)
     }
   }
 
-  pub fn update_pair(&self, in_value: u16, in_register_pair: String) {
+  pub fn set_pair(&mut self, in_value: u16, in_register_pair: String) {
     match in_register_pair.as_str() {
-      "af" => self.update_registers(&mut self.af, in_value),
+      "af" => update_registers(&mut self.af, in_value),
     _ => println!("Invalid register pair: {}", in_register_pair)
     }
   }
@@ -55,8 +55,8 @@ impl Registers {
       }
     }
   }
+}
 
-  fn update_registers(&self, in_reg_pair: &mut RegisterPair, in_value: u16) {
+fn update_registers(in_reg_pair: &mut RegisterPair, in_value: u16) {
 
-  }
 }

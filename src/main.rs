@@ -5,6 +5,8 @@
   https://doc.rust-lang.org/book/ch05-01-defining-structs.html
 */
 
+use core::prelude::v1;
+
 use crate::registers::Registers;
 
 pub mod registers;
@@ -24,6 +26,40 @@ fn generate_struct() -> MyStruct {
 }
 
 struct Color(i32, i32, i32);
+
+enum IpAddr {
+  V4(u8, u8, u8, u8),
+  V6(String)
+}
+
+impl IpAddr {
+  fn print(&self) -> String {
+    match self {
+      Self::V4(byte1, byte2, byte3, byte4) => {
+        return format!("{}.{}.{}.{}", byte1.to_ascii_lowercase(), byte2.to_ascii_lowercase(), byte3.to_ascii_lowercase(), byte4.to_ascii_lowercase());
+      }
+      Self::V6(v6_str) => v6_str.to_string()
+    }
+  }
+}
+
+enum TestAddress {
+  Type1(u8, u8, u8),
+  Type2(String)
+}
+
+impl std::fmt::Display for TestAddress {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+      match self {
+        Self::Type1(v1, v2, v3) => {
+          write!(f, "{}, {}, {}", v1, v2, v3)
+        },
+        Self::Type2(value) => {
+          write!(f, "{}", value)
+        }
+      }
+  }
+}
 
 fn my_function(in_value: &mut i32) {
     // Stack variables such as integers just need to be dereferenced when passed by reference
@@ -70,14 +106,36 @@ fn get_first_word(in_string: &str) -> &str {
   &in_string[..]
 }
 
-enum IpAddrFamily {
-  IPv4,
-  IPv6
+// ? operator is a 'try'
+fn add_opt_values(in_val1: Option<i32>, in_val2: Option<i32>) -> Option<i32> {
+  Some(in_val1? + in_val2?)
 }
 
-struct IpAddress {
-  
+fn test_ref<'a>(in_string: &'a str, in_str_2: &'a str) -> &'a str {
+  // &i32 - a reference
+  // &'a i32 - reference with explicit lifetime
+  if in_string.len() > in_str_2.len() {
+    in_string
+  } else {
+    in_str_2
+  }
 }
+
+/*
+  'a, 'b, '..z are used to specify the lifetime/scope of particular variables
+  e.g. This code won't compile, because in_str_1 is in scope a, in_str_2 is in scope b
+
+  fn test_ref<'a, 'b>(in_str_1: &'a str, in_str_2: &'b str) -> &'a str {
+    // &i32 - a reference
+    // &'a i32 - reference with explicit lifetime
+    if in_string.len() > in_str_2.len() {
+      in_string
+    } else {
+      in_str_2
+    }
+  }
+
+*/
 
 fn main() {
     // Underscore prefix tells the compiler that the variable is unused to prevent warnings
@@ -216,8 +274,44 @@ fn main() {
 
     // Compiler can infer the type
     let _optional_value = Some(10);
+
     // 'None' value can be instantiated, but requires explicit type:
     let _empty_value: Option<i32> = None;
 
+    // Can extract value inside optional with match statement
+    match add_opt_values(_optional_value, _empty_value) {
+      Some(val) => {
+        println!("Added optionals: {}", val);
+      },
+      None => {
+        println!("One or more values were empty :<");
+      }
+    }
+    // Alternatively use Option::ok_or()
+    let kekw = _optional_value.ok_or("An error");
+    // Optionals must be copied instead of moved
+    println!("Post match optional value = {:p}", &_optional_value);
+
+    // How do you access this?
+    let _v4_addr = IpAddr::V4(192, 168, 10, 1);
+    let _v6_addr: IpAddr = IpAddr::V6(String::from("::1"));
+    // Believe it needs to have functions etc to access member variables?
+    println!("v4 addr = {}", _v4_addr.print());
+    println!("v6 addr = {}", _v6_addr.print());
+
+    let test_addr: TestAddress = TestAddress::Type1(10, 20, 30);
+    println!("kekw {}", test_addr);
     
+    let string_1: String = String::from("my string 1");
+
+
+    let bad_ref: &str;
+
+    {
+      let string_2: String = String::from("short stick");
+      // bad_ref = test_ref(&string_1, &string_2);
+    }
+    // println!("bad_ref: {}", bad_ref);
+
+    // let _my_str_ref: &str = test_ref(&string_1, &string_2);
 }
