@@ -1,5 +1,5 @@
 // pub mod Registers;
-use object::{endian, LittleEndian, BigEndian, Endianness, Endian};
+use object::Endianness;
 
 pub struct RegisterPair {
   first: u8,
@@ -15,17 +15,7 @@ pub struct Registers {
 }
 
 impl Registers {
-  // Public
   pub fn init_registers() -> Registers {
-    // let endian: LittleEndian = endian::NativeEndian;
-    // match endian {
-    //   LittleEndian => {
-
-    //   },
-    //   BigEndian => {
-
-    //   }
-    // }
 
     Registers {
       af: RegisterPair { first: 0, second: 0, both: 0 },
@@ -69,13 +59,13 @@ impl Registers {
 }
 
 fn update_registers(in_reg_pair: &mut RegisterPair, in_value: u16) {
-
+  in_reg_pair.both = in_value;
 }
 
 pub fn determine_endianess() -> Endianness {
   use std::mem;
   let i: u16 = 0x1234;
-  let mut _bs = [0u8; mem::size_of::<u16>()];
+  let mut _bs: [u8; 2] = [0u8; mem::size_of::<u16>()];
   _bs = unsafe { mem::transmute(i) };
   if _bs[0] == 0x12 {
     return Endianness::Big;
