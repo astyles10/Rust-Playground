@@ -7,7 +7,9 @@
 
 use core::prelude::v1;
 
-use crate::registers::Registers;
+use object::Endianness;
+
+use crate::registers::{Registers, determine_endianess};
 
 pub mod registers;
 
@@ -312,6 +314,23 @@ fn main() {
       // bad_ref = test_ref(&string_1, &string_2);
     }
     // println!("bad_ref: {}", bad_ref);
+    let le: u16 = 0x1234;
+    println!("Original: {}, LE: {}, BE: {}", le, le.to_le(), le.to_be());
+
+    let a: u8 = 0x12;
+    let b: u8 = 0x34;
+    let ab: u16 = (a as u16) << 8 | (b as u16);
+
+    println!("AB = {:X}", ab);
+
+    match determine_endianess() {
+      Endianness::Big => {
+        println!("Big Endian")
+      }
+      Endianness::Little => {
+        println!("Little Endian")
+      }
+    }
 
     // let _my_str_ref: &str = test_ref(&string_1, &string_2);
 }
