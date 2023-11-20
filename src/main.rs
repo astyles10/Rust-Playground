@@ -3,6 +3,8 @@
   https://fasterthanli.me/articles/a-half-hour-to-learn-rust
   https://gtk-rs.org/gtk4-rs/stable/latest/book/introduction.html
   https://doc.rust-lang.org/book/ch05-01-defining-structs.html
+
+  Make something from here? https://build-your-own.org/blog/20231108_1week/?id=20231108
 */
 
 use core::prelude::v1;
