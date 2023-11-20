@@ -141,6 +141,18 @@ fn test_ref<'a>(in_string: &'a str, in_str_2: &'a str) -> &'a str {
 
 */
 
+// Generic function example, with a trait specification
+// I.e. largest is usable by any data type which is comparable (i.e. an ordered type, such as a number or character)
+fn largest<T: std::cmp::PartialOrd>(in_list: &[T]) -> &T {
+  let mut largest = &in_list[0];
+  for item in in_list {
+    if item > largest {
+      largest = item
+    }
+  }
+  largest
+}
+
 fn main() {
     // Underscore prefix tells the compiler that the variable is unused to prevent warnings
     let _x: i32 = 13;
@@ -333,6 +345,13 @@ fn main() {
         println!("Little Endian")
       }
     }
+
+    let char_list: [char; 4] = ['a', 'b', 'c', 'd'];
+    println!("Largest in char_list: {}", largest(&char_list));
+
+    // "Largest" string determined by alphabetical order:
+    let string_list: [&str; 4] = ["alargest", "blargest", "clargest", "dlargest"];
+    println!("Largest in string_list: {}", largest(&string_list));
 
     // let _my_str_ref: &str = test_ref(&string_1, &string_2);
 }
