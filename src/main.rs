@@ -7,13 +7,12 @@
   Make something from here? https://build-your-own.org/blog/20231108_1week/?id=20231108
 */
 
-use core::prelude::v1;
-
 use object::Endianness;
 
 use crate::registers::{Registers, determine_endianess};
 
 pub mod registers;
+pub mod comparable;
 
 pub struct MyStruct {
     pub field_1: i32,
@@ -22,11 +21,11 @@ pub struct MyStruct {
 }
 
 fn generate_struct() -> MyStruct {
-    return MyStruct {
+    MyStruct {
         field_1: 45,
         field_2: true,
         str_field: String::from("kekw")
-    };
+    }
 }
 
 struct Color(i32, i32, i32);
@@ -40,7 +39,7 @@ impl IpAddr {
   fn print(&self) -> String {
     match self {
       Self::V4(byte1, byte2, byte3, byte4) => {
-        return format!("{}.{}.{}.{}", byte1.to_ascii_lowercase(), byte2.to_ascii_lowercase(), byte3.to_ascii_lowercase(), byte4.to_ascii_lowercase());
+        format!("{}.{}.{}.{}", byte1.to_ascii_lowercase(), byte2.to_ascii_lowercase(), byte3.to_ascii_lowercase(), byte4.to_ascii_lowercase())
       }
       Self::V6(v6_str) => v6_str.to_string()
     }
@@ -107,7 +106,7 @@ fn get_first_word(in_string: &str) -> &str {
       return &in_string[0..i];
     }
   }
-  &in_string[..]
+  in_string
 }
 
 // ? operator is a 'try'
@@ -207,7 +206,7 @@ fn main() {
     // Struct tuple: struct Color(i32, i32, i32)
     // a structured tuple, or a struct without names
     let _black = Color(0, 0, 0);
-    _black.0;
+    // _black.0;
 
     // Memory is returned once variable is out of scope
     {
@@ -304,7 +303,7 @@ fn main() {
       }
     }
     // Alternatively use Option::ok_or()
-    let kekw = _optional_value.ok_or("An error");
+    let _kekw = _optional_value.ok_or("An error");
     // Optionals must be copied instead of moved
     println!("Post match optional value = {:p}", &_optional_value);
 
@@ -318,13 +317,13 @@ fn main() {
     let test_addr: TestAddress = TestAddress::Type1(10, 20, 30);
     println!("kekw {}", test_addr);
     
-    let string_1: String = String::from("my string 1");
+    let _string_1: String = String::from("my string 1");
 
 
-    let bad_ref: &str;
+    let _bad_ref: &str;
 
     {
-      let string_2: String = String::from("short stick");
+      let _string_2: String = String::from("short stick");
       // bad_ref = test_ref(&string_1, &string_2);
     }
     // println!("bad_ref: {}", bad_ref);
