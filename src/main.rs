@@ -1,4 +1,4 @@
-use std::{io, process::exit};
+use std::{char, io, process::exit};
 
 fn main () {
   let mut user_input_buffer: String = String::new();
@@ -17,6 +17,11 @@ fn fail (error: &String) {
   exit(1);
 }
 
+fn echo_user_input(user_input_buffer: &str) {
+  let cleaned_string = clean_string(user_input_buffer);
+  do_calculate(&cleaned_string, 0, 0, '+');
+}
+
 fn clean_string(input: &str) -> String {
   let mut tmp = input.replace(" ", "");
   tmp = tmp.replace("\t", "");
@@ -24,32 +29,38 @@ fn clean_string(input: &str) -> String {
   tmp
 }
 
-fn do_calculate(input: &str, start_index: usize, operator: char) {
-  println!("Start do_calculate: start_index = {}, input.len() = {}, input = '{}'", start_index, input.len(), input);
-  println!("Current operator: {}", operator);
-  if start_index >= input.len() {
-    return;
-  }
+fn do_calculate(input: &str, start_index: usize, operand: i64, operator: char) -> i64 {
+  // let mut user_input_buffer: String = String::new();
+  // let _buffer_size: Result<usize, io::Error> = io::stdin().read_line(&mut user_input_buffer);
+  // println!("\nStart do_calculate: start_index = {}, input.len() = {}, input = '{}'", start_index, input.len(), input);
 
-  let substr: &str = &input[start_index..];
-  println!("starting substr = {}", substr);
+  let mut iter: std::iter::Peekable<std::str::CharIndices<'_>> = input.char_indices().peekable();
+  let char_index: Option<(usize, char)> = iter.next();
 
-  // Need to advance the iterator to the index in a rust way
-  // https://stackoverflow.com/questions/62186871/how-to-correctly-use-peek-in-rust
-  for c in substr.char_indices() {
-    if c.1.is_numeric() {
-      let substr: &str = &input[c.0..];
-      println!("inside loop: current substr = {}", substr);
-      let num: (usize, i64) = parse_number_string(substr);
-      let end_index: usize = num.0;
-      // println!("Got index: {}, number: {}, input.len() {}", num.0, num.1, input.len());
-      println!("Got number: {}", num.1);
-      do_calculate(substr, end_index, operator);
-      break;
-    }
-    else if !c.1.is_numeric() && validate_operator(c.1) {
-      do_calculate(input, c.0, c.1);
-      break;
+  match char_index {
+    Some((index, char)) => {
+      if char.is_numeric() {
+        let num: (usize, i64) = parse_number_string(input);
+        println!("Got num: {}", num.1);
+
+        // Need to check if we can evaluate here...
+
+        if iter.peek().is_none() || num.0 >= input.len() {
+          let calculation = calculate_expression(operator, operand, num.1);
+          println!("Answer: {}", calculation);
+          return calculation;
+        }
+
+        return do_calculate(&input[num.0..], num.0, num.1, operator);
+      } else if validate_operator(char) {
+        println!("Got operator: {}", char);
+        // Need to see if we can evaluate here
+        return do_calculate(&input[index+1..], index+1, operand, char);
+      }
+      0
+    },
+    None => {
+      0
     }
   }
 }
@@ -71,7 +82,7 @@ fn parse_number_string(input: &str) -> (usize, i64) {
 
   let substr: &str = &input[..end_index];
   let number: Result<i64, std::num::ParseIntError> = substr.parse::<i64>();
-  println!("parse_number_string: substr = {} end_index = {}", substr, end_index);
+  // println!("parse_number_string: substr = {} end_index = {}", substr, end_index);
   match number {
     Ok(num) => {
       (end_index, num)
@@ -85,14 +96,25 @@ fn parse_number_string(input: &str) -> (usize, i64) {
 
 fn validate_operator(input: char) -> bool {
   let operators = "+-*/%^()";
-  if operators.contains(input) {
-    return true
+  let result = operators.contains(input);
+  // println!("Got result: {}", result);
+  if !result {
+    fail(&format!("invalid operator received: {}", input));
   }
-  fail(&format!("invalid operator received: {}", input));
-  false
+  result
 }
 
-fn echo_user_input(user_input_buffer: &str) {
-  let cleaned_string = clean_string(user_input_buffer);
-  do_calculate(&cleaned_string, 0, 'n');
+fn is_evaluatable(iter: std::iter::Peekable<std::str::CharIndices<'_>>) {
+  
+}
+
+fn calculate_expression(operator: char, operand1: i64, operand2: i64) -> i64 {
+  if operator == '+' {
+    return add(operand1, operand2);
+  }
+  0
+}
+
+fn add(operand1: i64, operand2: i64) -> i64 {
+  operand1 + operand2
 }
