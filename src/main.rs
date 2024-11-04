@@ -66,7 +66,6 @@ fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
         return res
       } else if validate_operator(char) {
         println!("\nGot operator: {}", char);
-        //Here is where the bracket logic probably needs to go
         if "()".contains(char) {
           return do_calculate(&input[index+1..], operand, operator);
         }
@@ -81,7 +80,6 @@ fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
   }
 }
 
-// Return the number and the end index
 fn parse_number_string(input: &str) -> (usize, i64) {
   let mut end_index: usize = 0;
   for c in input.char_indices() {
