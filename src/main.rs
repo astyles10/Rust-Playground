@@ -1,5 +1,8 @@
 use std::{char, io, process::exit};
 
+// static OPERATORS: [char; 7] = ['(', ')', '^', '/', '*', '+', '-'];
+static OPERATORS: &str = "()^/*+-";
+
 fn main () {
   let mut user_input_buffer: String = String::new();
   let buffer_size: Result<usize, io::Error> = io::stdin().read_line(&mut user_input_buffer);
@@ -19,7 +22,8 @@ fn fail (error: &String) {
 
 fn echo_user_input(user_input_buffer: &str) {
   let cleaned_string = clean_string(user_input_buffer);
-  do_calculate(&cleaned_string, 0, 0, '+');
+  let res = do_calculate(&cleaned_string, 0, '+');
+  println!("Got result: {}", res);
 }
 
 fn clean_string(input: &str) -> String {
@@ -29,7 +33,7 @@ fn clean_string(input: &str) -> String {
   tmp
 }
 
-fn do_calculate(input: &str, start_index: usize, operand: i64, operator: char) -> i64 {
+fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
   // let mut user_input_buffer: String = String::new();
   // let _buffer_size: Result<usize, io::Error> = io::stdin().read_line(&mut user_input_buffer);
   // println!("\nStart do_calculate: start_index = {}, input.len() = {}, input = '{}'", start_index, input.len(), input);
@@ -40,27 +44,36 @@ fn do_calculate(input: &str, start_index: usize, operand: i64, operator: char) -
   match char_index {
     Some((index, char)) => {
       if char.is_numeric() {
-        let num: (usize, i64) = parse_number_string(input);
-        println!("Got num: {}", num.1);
+        let mut num: (usize, i64) = parse_number_string(input);
+        println!("\nGot num: {}", num.1);
+        let mut evaluated = false;
 
-        // Need to check if we can evaluate here...
-
-        if iter.peek().is_none() || num.0 >= input.len() {
-          let calculation = calculate_expression(operator, operand, num.1);
-          println!("Answer: {}", calculation);
-          return calculation;
+        if is_evaluatable(&input[num.0..], operator) {
+          println!("Calculating with operand {} and number {}...", operand, num.1);
+          num.1 = calculate_expression(operator, operand, num.1);
+          println!("Calculated value: {}", num.1);
+          evaluated = true;
         }
 
-        return do_calculate(&input[num.0..], num.0, num.1, operator);
+        if iter.peek().is_none() {
+          return num.1;
+        }
+
+        // What if we didn't evaulate?
+        let res = do_calculate(&input[num.0..], num.1, operator);
+        if !evaluated {
+          return calculate_expression(operator, operand, res);
+        }
+        return res
       } else if validate_operator(char) {
-        println!("Got operator: {}", char);
-        // Need to see if we can evaluate here
-        return do_calculate(&input[index+1..], index+1, operand, char);
+        println!("\nGot operator: {}", char);
+        return do_calculate(&input[index+1..], operand, char);
       }
       0
     },
     None => {
-      0
+      println!("End of calculation");
+      operand
     }
   }
 }
@@ -98,23 +111,76 @@ fn validate_operator(input: char) -> bool {
   let operators = "+-*/%^()";
   let result = operators.contains(input);
   // println!("Got result: {}", result);
-  if !result {
-    fail(&format!("invalid operator received: {}", input));
-  }
+  // if !result {
+  //   fail(&format!("invalid operator received: {}", input));
+  // }
   result
 }
 
-fn is_evaluatable(iter: std::iter::Peekable<std::str::CharIndices<'_>>) {
-  
+fn is_evaluatable(input: &str, current_operator: char) -> bool {
+  let mut iter: std::iter::Peekable<std::str::CharIndices<'_>> = input.char_indices().peekable();
+  let next_char: Option<&(usize, char)> = iter.peek();
+  match next_char {
+    Some(val) => {
+      println!("is_evaluatable got char: {}", val.1);
+      let can_evaluate_expression = validate_operator(val.1) && is_operator_precedence_higher(current_operator, val.1);
+      println!("Expression evalatable = {}", can_evaluate_expression);
+      can_evaluate_expression
+    },
+    None => {
+      true
+    }
+  }
+}
+
+fn is_operator_precedence_higher(subject_operator: char, next_operator: char) -> bool {
+  if OPERATORS.contains(subject_operator) && OPERATORS.contains(next_operator) {
+    let subject_operator_precedence: Option<usize> = OPERATORS.find(subject_operator);
+    let next_operator_precedence: Option<usize> = OPERATORS.find(next_operator);
+    println!("subj op: {} next op: {}", subject_operator_precedence.unwrap(), next_operator_precedence.unwrap());
+    let next_operator_higher_precedence: bool = subject_operator_precedence.unwrap() < next_operator_precedence.unwrap();
+    return next_operator_higher_precedence;
+  }
+  false
 }
 
 fn calculate_expression(operator: char, operand1: i64, operand2: i64) -> i64 {
-  if operator == '+' {
-    return add(operand1, operand2);
+  if operator == '^' {
+    return power(operand1, operand2);
+  } else if operator == '/' {
+    return divide(operand1, operand2);
+  } else if operator == '*' {
+    return operand1 * operand2;
+  } else if operator == '+' {
+    return operand1 + operand2;
+  } else if operator == '-' {
+    return operand1 - operand2;
   }
+  
   0
 }
 
-fn add(operand1: i64, operand2: i64) -> i64 {
-  operand1 + operand2
+fn power(operand: i64, exponent: i64) -> i64 {
+  let exponent = u32::try_from(exponent);
+  match exponent {
+    Ok(exp) => {
+      operand.pow(exp)
+    },
+    Err(e) => {
+      fail(&e.to_string());
+      0
+    }
+  }
+}
+
+fn divide(operand1: i64, operand2: i64) -> i64 {
+  match operand1.checked_div(operand2) {
+    None => {
+      fail(&"Failed to divide number".to_string());
+      0
+    },
+    Some (result) => {
+      result
+    }
+  }
 }
