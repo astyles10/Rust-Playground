@@ -1,7 +1,7 @@
 use std::{char, io, process::exit};
 
 // static OPERATORS: [char; 7] = ['(', ')', '^', '/', '*', '+', '-'];
-static OPERATORS: &str = "()^/*+-";
+static OPERATORS: &str = "(^/*+-)";
 
 fn main () {
   let mut user_input_buffer: String = String::new();
@@ -49,7 +49,7 @@ fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
         let mut evaluated = false;
 
         if is_evaluatable(&input[num.0..], operator) {
-          println!("Calculating with operand {} and number {}...", operand, num.1);
+          println!("Calculating with operator {}, operand {} and number {}...", operator, operand, num.1);
           num.1 = calculate_expression(operator, operand, num.1);
           println!("Calculated value: {}", num.1);
           evaluated = true;
@@ -59,7 +59,6 @@ fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
           return num.1;
         }
 
-        // What if we didn't evaulate?
         let res = do_calculate(&input[num.0..], num.1, operator);
         if !evaluated {
           return calculate_expression(operator, operand, res);
@@ -67,6 +66,10 @@ fn do_calculate(input: &str, operand: i64, operator: char) -> i64 {
         return res
       } else if validate_operator(char) {
         println!("\nGot operator: {}", char);
+        //Here is where the bracket logic probably needs to go
+        if "()".contains(char) {
+          return do_calculate(&input[index+1..], operand, operator);
+        }
         return do_calculate(&input[index+1..], operand, char);
       }
       0
@@ -95,7 +98,6 @@ fn parse_number_string(input: &str) -> (usize, i64) {
 
   let substr: &str = &input[..end_index];
   let number: Result<i64, std::num::ParseIntError> = substr.parse::<i64>();
-  // println!("parse_number_string: substr = {} end_index = {}", substr, end_index);
   match number {
     Ok(num) => {
       (end_index, num)
