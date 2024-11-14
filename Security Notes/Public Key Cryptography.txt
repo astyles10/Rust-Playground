@@ -1,0 +1,5 @@
+Public Key Cryptography uses a Private and Public key.
+
+The public key can be used by anyone to encrypt messages or sign certificates etc.
+The private key is kept secret and used to decrypt messages/sign documents.
+
